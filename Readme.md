@@ -45,14 +45,14 @@ import (
 )
 
 func main() {
-	testQueue := redismq.CreateQueue("localhost", "6379", "", 9, "clicks")
+	testQueue := redismq.CreateQueue("localhost", "6379", "", 9, "clicks", false)
 	...
 }
 ```
 To write into the queue you simply use `Put()`:
 ```go
 	...
-	testQueue := redismq.CreateQueue("localhost", "6379", "", 9, "clicks")
+	testQueue := redismq.CreateQueue("localhost", "6379", "", 9, "clicks", false)
 	testQueue.Put("testpayload")
 	...
 }

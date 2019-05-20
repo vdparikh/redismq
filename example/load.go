@@ -1,17 +1,18 @@
 package main
 
 import (
-	"github.com/adjust/redismq"
 	"log"
 	"math/rand"
 	"runtime"
+
+	"github.com/adjust/redismq"
 )
 
 func main() {
 	runtime.GOMAXPROCS(5)
-	server := redismq.NewServer("localhost", "6379", "", 9, "9999")
+	server := redismq.NewServer("localhost", "6379", "", 9, "9999", false)
 	server.Start()
-	queue := redismq.CreateQueue("localhost", "6379", "", 9, "example")
+	queue := redismq.CreateQueue("localhost", "6379", "", 9, "example", false)
 	go write(queue)
 	go read(queue, "1")
 	go read(queue, "2")

@@ -31,7 +31,7 @@ func unmarshalPackage(input string, queue *Queue, consumer *Consumer) (*Package,
 func (pack *Package) getString() string {
 	json, err := json.Marshal(pack)
 	if err != nil {
-		log.Printf(" Queue failed to marshal content %s [%s]", pack, err.Error())
+		log.Printf(" Queue failed to marshal content %v [%s]", pack, err.Error())
 		// TODO build sensible error handling
 		return ""
 	}

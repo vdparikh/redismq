@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-redis/redis"
 	. "github.com/matttproud/gocheck"
-	"gopkg.in/redis.v3"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -22,7 +22,7 @@ var (
 	redisHost     = "localhost"
 	redisPort     = "6379"
 	redisPassword = ""
-	redisDB       = int64(9)
+	redisDB       = int(9)
 	_             = Suite(&TestSuite{})
 )
 
@@ -38,7 +38,7 @@ func (suite *TestSuite) SetUpSuite(c *C) {
 
 func (suite *TestSuite) SetUpTest(c *C) {
 	c.Assert(suite.redisClient.FlushDb().Err(), IsNil)
-	suite.queue = CreateQueue(redisHost, redisPort, redisPassword, redisDB, "teststuff")
+	suite.queue = CreateQueue(redisHost, redisPort, redisPassword, redisDB, "teststuff", false)
 	suite.consumer, _ = suite.queue.AddConsumer("testconsumer")
 }
 
@@ -240,7 +240,7 @@ func (suite *TestSuite) TestGetFailed(c *C) {
 
 // should handle multiple queues
 func (suite *TestSuite) TestSecondQueue(c *C) {
-	secondQueue := CreateQueue(redisHost, redisPort, redisPassword, redisDB, "teststuff2")
+	secondQueue := CreateQueue(redisHost, redisPort, redisPassword, redisDB, "teststuff2", false)
 	secondConsumer, err := secondQueue.AddConsumer("testconsumer")
 	c.Assert(err, Equals, nil)
 
@@ -355,18 +355,18 @@ func (suite *TestSuite) TestMultiGetNoWait(c *C) {
 
 // should not allow two buffered queues with the same name
 func (suite *TestSuite) TestUniqueBufferedQueue(c *C) {
-	q := CreateBufferedQueue(redisHost, redisPort, redisPassword, redisDB, "buffered_test1", 100)
+	q := CreateBufferedQueue(redisHost, redisPort, redisPassword, redisDB, "buffered_test1", 100, false)
 	err := q.Start()
 	c.Check(err, Equals, nil)
 
-	q2 := CreateBufferedQueue(redisHost, redisPort, redisPassword, redisDB, "buffered_test1", 100)
+	q2 := CreateBufferedQueue(redisHost, redisPort, redisPassword, redisDB, "buffered_test1", 100, false)
 	err = q2.Start()
 	c.Check(err.Error(), Equals, "buffered queue with this name is already started")
 }
 
 // should be able to put and get from buffered queue
 func (suite *TestSuite) TestBufferedQueue(c *C) {
-	q := CreateBufferedQueue(redisHost, redisPort, redisPassword, redisDB, "buffered_test2", 100)
+	q := CreateBufferedQueue(redisHost, redisPort, redisPassword, redisDB, "buffered_test2", 100, false)
 	err := q.Start()
 	c.Assert(err, Equals, nil)
 
@@ -389,7 +389,7 @@ func (suite *TestSuite) TestBufferedQueue(c *C) {
 
 // should not wait longer than 1 second to read from buffered queue
 func (suite *TestSuite) TestBufferedQueueNoWait(c *C) {
-	q := CreateBufferedQueue(redisHost, redisPort, redisPassword, redisDB, "buffered_test3", 100)
+	q := CreateBufferedQueue(redisHost, redisPort, redisPassword, redisDB, "buffered_test3", 100, false)
 	err := q.Start()
 	c.Assert(err, Equals, nil)
 
@@ -408,7 +408,7 @@ func (suite *TestSuite) TestBufferedQueueNoWait(c *C) {
 
 // should flush buffered queue upon call
 func (suite *TestSuite) TestBufferedFlush(c *C) {
-	q := CreateBufferedQueue(redisHost, redisPort, redisPassword, redisDB, "buffered_test4", 1000)
+	q := CreateBufferedQueue(redisHost, redisPort, redisPassword, redisDB, "buffered_test4", 1000, false)
 	err := q.Start()
 	c.Assert(err, Equals, nil)
 	time.Sleep(100 * time.Millisecond)

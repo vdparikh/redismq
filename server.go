@@ -13,7 +13,7 @@ type Server struct {
 }
 
 // NewServer returns a Server that can be started with Start()
-func NewServer(redisHost, redisPort, redisPassword string, redisDb int64, port string) *Server {
+func NewServer(redisHost, redisPort, redisPassword string, redisDb int, port string) *Server {
 	observer := NewObserver(redisHost, redisPort, redisPassword, redisDb)
 	s := &Server{
 		port:     port,

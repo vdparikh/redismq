@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/adjust/redismq"
 	"log"
 	"math/rand"
 	"runtime"
+
+	"github.com/adjust/redismq"
 )
 
 func main() {
@@ -33,7 +34,7 @@ func randInt(min int, max int) int {
 }
 
 func write(queue string) {
-	testQueue := redismq.CreateQueue("localhost:6379", "", 9, queue)
+	testQueue := redismq.CreateQueue("localhost:6379", "", 9, queue, false)
 	payload := randomString(1024 * 1) //adjust for size
 	for {
 		testQueue.Put(payload)
@@ -41,7 +42,7 @@ func write(queue string) {
 }
 
 func read(queue, prefix string) {
-	testQueue := redismq.CreateQueue("localhost:6379", "", 9, queue)
+	testQueue := redismq.CreateQueue("localhost:6379", "", 9, queue, false)
 	consumer, err := testQueue.AddConsumer("testconsumer" + prefix)
 	if err != nil {
 		panic(err)

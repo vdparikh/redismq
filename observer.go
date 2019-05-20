@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"gopkg.in/redis.v3"
+	"github.com/go-redis/redis"
 )
 
 // Observer is a very simple implementation of an statistics observer
@@ -19,7 +19,7 @@ type Observer struct {
 	redisHost     string        `json:"-"`
 	redisPort     string        `json:"-"`
 	redisPassword string        `json:"-"`
-	redisDb       int64         `json:"-"`
+	redisDb       int           `json:"-"`
 	Stats         map[string]*QueueStat
 }
 
@@ -52,7 +52,7 @@ type ConsumerStat struct {
 }
 
 // NewObserver returns an Oberserver to monitor different statistics from redis
-func NewObserver(redisHost, redisPort, redisPassword string, redisDb int64) *Observer {
+func NewObserver(redisHost, redisPort, redisPassword string, redisDb int) *Observer {
 	q := &Observer{
 		redisHost:     redisHost,
 		redisPort:     redisPort,
