@@ -247,6 +247,27 @@ func (queue *Queue) AddConsumer(name string) (c *Consumer, err error) {
 	return c, nil
 }
 
+// Consume return channel to read on
+func (c *Consumer) Consume() chan []byte {
+
+	chn := make(chan []byte)
+
+	go func(consumer *Consumer) {
+		consumer.ResetWorking()
+		for {
+			p, err := consumer.Get()
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			p.Ack()
+			chn <- []byte(p.Payload)
+		}
+	}(c)
+
+	return chn
+}
+
 func (queue *Queue) isActiveConsumer(name string) bool {
 	val := queue.redisClient.Get(consumerHeartbeatKey(queue.Name, name)).Val()
 	return val == "ping"
