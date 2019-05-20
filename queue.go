@@ -252,10 +252,10 @@ func (c *Consumer) Consume() chan []byte {
 
 	chn := make(chan []byte)
 
-	go func(consumer *Consumer) {
-		consumer.ResetWorking()
+	go func() {
+		c.ResetWorking()
 		for {
-			p, err := consumer.Get()
+			p, err := c.Get()
 			if err != nil {
 				fmt.Println(err)
 				continue
@@ -263,7 +263,7 @@ func (c *Consumer) Consume() chan []byte {
 			p.Ack()
 			chn <- []byte(p.Payload)
 		}
-	}(c)
+	}()
 
 	return chn
 }
