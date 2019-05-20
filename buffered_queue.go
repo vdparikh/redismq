@@ -21,8 +21,8 @@ type BufferedQueue struct {
 // To start writing the buffer to redis use Start().
 // Optimal BufferSize seems to be around 200.
 // Works like SelectBufferedQueue for existing queues
-func CreateBufferedQueue(redisHost, redisPort, redisPassword string, redisDB int64, name string, bufferSize int) *BufferedQueue {
-	q := CreateQueue(redisHost, redisPort, redisPassword, redisDB, name)
+func CreateBufferedQueue(redisHost, redisPort, redisPassword string, redisDB int, name string, bufferSize int, tls bool) *BufferedQueue {
+	q := CreateQueue(redisHost, redisPort, redisPassword, redisDB, name, tls)
 	return &BufferedQueue{
 		Queue:        q,
 		BufferSize:   bufferSize,
@@ -33,7 +33,7 @@ func CreateBufferedQueue(redisHost, redisPort, redisPassword string, redisDB int
 }
 
 // SelectBufferedQueue returns a BufferedQueue if a queue with the name exists
-func SelectBufferedQueue(redisHost, redisPort, redisPassword string, redisDB int64, name string, bufferSize int) (queue *BufferedQueue, err error) {
+func SelectBufferedQueue(redisHost, redisPort, redisPassword string, redisDB int, name string, bufferSize int) (queue *BufferedQueue, err error) {
 	q, err := SelectQueue(redisHost, redisPort, redisPassword, redisDB, name)
 	if err != nil {
 		return nil, err
@@ -90,7 +90,7 @@ func (queue *BufferedQueue) startWritingBufferToRedis() {
 					p := <-queue.Buffer
 					a = append(a, p.getString())
 				}
-				queue.redisClient.LPush(queueInputKey(queue.Name), a...)
+				queue.redisClient.LPush(queueInputKey(queue.Name), a)
 				queue.incrRate(queueInputRateKey(queue.Name), int64(size))
 				for i := 0; i < len(queue.flushStatus); i++ {
 					c := <-queue.flushStatus

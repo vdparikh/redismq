@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"gopkg.in/redis.v3"
+	"github.com/go-redis/redis"
 )
 
 // Consumer are used for reading from queues
@@ -52,7 +52,7 @@ func (consumer *Consumer) MultiGet(length int) ([]*Package, error) {
 	}
 
 	// TODO maybe use transactions for rollback in case of errors?
-	reqs, err := consumer.Queue.redisClient.Pipelined(func(c *redis.Pipeline) error {
+	reqs, err := consumer.Queue.redisClient.Pipelined(func(c redis.Pipeliner) error {
 		c.BRPopLPush(
 			queueInputKey(consumer.Queue.Name),
 			consumerWorkingQueueKey(consumer.Queue.Name, consumer.Name),

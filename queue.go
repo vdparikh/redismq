@@ -1,11 +1,12 @@
 package redismq
 
 import (
+	"crypto/tls"
 	"fmt"
 	"strconv"
 	"time"
 
-	"gopkg.in/redis.v3"
+	"github.com/go-redis/redis"
 )
 
 // Queue is the central element of this library.
@@ -27,12 +28,15 @@ type dataPoint struct {
 
 // CreateQueue return a queue that you can Put() or AddConsumer() to
 // Works like SelectQueue for existing queues
-func CreateQueue(redisHost, redisPort, redisPassword string, redisDB int64, name string) *Queue {
+func CreateQueue(redisHost, redisPort, redisPassword string, redisDB int, name string, tls bool) *Queue {
+	if tls {
+		return newSSLQueue(redisHost, redisPort, redisPassword, redisDB, name)
+	}
 	return newQueue(redisHost, redisPort, redisPassword, redisDB, name)
 }
 
 // SelectQueue returns a Queue if a queue with the name exists
-func SelectQueue(redisHost, redisPort, redisPassword string, redisDB int64, name string) (queue *Queue, err error) {
+func SelectQueue(redisHost, redisPort, redisPassword string, redisDB int, name string) (queue *Queue, err error) {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     redisHost + ":" + redisPort,
 		Password: redisPassword,
@@ -51,12 +55,25 @@ func SelectQueue(redisHost, redisPort, redisPassword string, redisDB int64, name
 	return newQueue(redisHost, redisPort, redisPassword, redisDB, name), nil
 }
 
-func newQueue(redisHost, redisPort, redisPassword string, redisDB int64, name string) *Queue {
+func newQueue(redisHost, redisPort, redisPassword string, redisDB int, name string) *Queue {
 	q := &Queue{Name: name}
 	q.redisClient = redis.NewClient(&redis.Options{
 		Addr:     redisHost + ":" + redisPort,
 		Password: redisPassword,
 		DB:       redisDB,
+	})
+	q.redisClient.SAdd(masterQueueKey(), name)
+	q.startStatsWriter()
+	return q
+}
+
+func newSSLQueue(redisHost, redisPort, redisPassword string, redisDB int, name string) *Queue {
+	q := &Queue{Name: name}
+	q.redisClient = redis.NewClient(&redis.Options{
+		Addr:      redisHost + ":" + redisPort,
+		Password:  redisPassword,
+		DB:        redisDB,
+		TLSConfig: &tls.Config{InsecureSkipVerify: true},
 	})
 	q.redisClient.SAdd(masterQueueKey(), name)
 	q.startStatsWriter()
