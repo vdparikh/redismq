@@ -21,8 +21,8 @@ type BufferedQueue struct {
 // To start writing the buffer to redis use Start().
 // Optimal BufferSize seems to be around 200.
 // Works like SelectBufferedQueue for existing queues
-func CreateBufferedQueue(redisHost, redisPort, redisPassword string, redisDB int64, name string, bufferSize int) *BufferedQueue {
-	q := CreateQueue(redisHost, redisPort, redisPassword, redisDB, name)
+func CreateBufferedQueue(redisHost, redisPort, redisPassword string, redisDB int64, name string, bufferSize int, tls bool) *BufferedQueue {
+	q := CreateQueue(redisHost, redisPort, redisPassword, redisDB, name, tls)
 	return &BufferedQueue{
 		Queue:        q,
 		BufferSize:   bufferSize,
