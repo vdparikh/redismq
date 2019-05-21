@@ -251,9 +251,9 @@ func (queue *Queue) AddConsumer(name string) (c *Consumer, err error) {
 func (c *Consumer) Consume() chan []byte {
 
 	chn := make(chan []byte)
+	c.ResetWorking()
 
 	go func() {
-		c.ResetWorking()
 		for {
 			p, err := c.Get()
 			if err != nil {
@@ -261,6 +261,7 @@ func (c *Consumer) Consume() chan []byte {
 				continue
 			}
 			p.Ack()
+			fmt.Println("Got Message", p.Queue, p.Payload)
 			chn <- []byte(p.Payload)
 		}
 	}()
