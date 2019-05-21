@@ -261,6 +261,7 @@ func (c *Consumer) Consume(fn func([]byte)) chan []byte {
 				continue
 			}
 			p.Ack()
+			fmt.Println("Got Message", string(p.Payload))
 			if fn != nil {
 				fn([]byte(p.Payload))
 				continue
