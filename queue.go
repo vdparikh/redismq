@@ -261,11 +261,11 @@ func (c *Consumer) Consume(fn func([]byte)) chan []byte {
 				continue
 			}
 			p.Ack()
-			chn <- []byte(p.Payload)
 			if fn != nil {
-				fmt.Println("Found Function...", fn)
 				fn([]byte(p.Payload))
+				continue
 			}
+			chn <- []byte(p.Payload)
 		}
 	}()
 
