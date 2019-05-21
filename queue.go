@@ -248,7 +248,7 @@ func (queue *Queue) AddConsumer(name string) (c *Consumer, err error) {
 }
 
 // Consume return channel to read on
-func (c *Consumer) Consume() chan []byte {
+func (c *Consumer) Consume(fn func([]byte)) chan []byte {
 
 	chn := make(chan []byte)
 	c.ResetWorking()
@@ -261,8 +261,10 @@ func (c *Consumer) Consume() chan []byte {
 				continue
 			}
 			p.Ack()
-			fmt.Println("Got Message", p.Queue, p.Payload)
 			chn <- []byte(p.Payload)
+			if fn != nil {
+				fn([]byte(p.Payload))
+			}
 		}
 	}()
 
