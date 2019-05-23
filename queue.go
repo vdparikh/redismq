@@ -58,9 +58,13 @@ func SelectQueue(redisHost, redisPort, redisPassword string, redisDB int, name s
 func newQueue(redisHost, redisPort, redisPassword string, redisDB int, name string) *Queue {
 	q := &Queue{Name: name}
 	q.redisClient = redis.NewClient(&redis.Options{
-		Addr:     redisHost + ":" + redisPort,
-		Password: redisPassword,
-		DB:       redisDB,
+		Addr:         redisHost + ":" + redisPort,
+		Password:     redisPassword,
+		DB:           redisDB,
+		MaxRetries:   5,
+		DialTimeout:  time.Second * 15,
+		ReadTimeout:  time.Second * 10,
+		WriteTimeout: time.Second * 10,
 	})
 	q.redisClient.SAdd(masterQueueKey(), name)
 	q.startStatsWriter()
@@ -261,7 +265,6 @@ func (c *Consumer) Consume(fn func([]byte)) chan []byte {
 				continue
 			}
 			p.Ack()
-			// fmt.Println("Got Message", string(p.Payload))
 			if fn != nil {
 				fn([]byte(p.Payload))
 				continue

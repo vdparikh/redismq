@@ -70,6 +70,44 @@ func (queue *BufferedQueue) Put(payload string) error {
 	return nil
 }
 
+// ConsumeMulti return channel to read on
+func (c *Consumer) ConsumeMulti(size int, fn func([]byte)) chan []byte {
+
+	fmt.Println("setting up buffered consumer")
+	chn := make(chan []byte)
+
+	go func(chn chan []byte, size int, fn func([]byte)) {
+		c.ResetWorking()
+		for {
+			packages, err := c.MultiGet(size)
+			if err != nil {
+				fmt.Println(err)
+				if err.Error() == "unacked Packages found" {
+					for i := 0; i < int(c.GetUnackedLength()); i++ {
+						p, _ := c.GetUnacked()
+						p.Ack()
+						go fn([]byte(p.Payload))
+					}
+				}
+				continue
+			}
+			packages[len(packages)-1].MultiAck()
+
+			for _, p := range packages {
+				fmt.Println("got multi packages", p.Payload)
+				if fn != nil {
+					fmt.Println("Got Package", p.Payload)
+					go fn([]byte(p.Payload))
+					continue
+				}
+				chn <- []byte(p.Payload)
+			}
+		}
+	}(chn, size, fn)
+
+	return chn
+}
+
 // FlushBuffer tells the background writer to flush the buffer to redis
 func (queue *BufferedQueue) FlushBuffer() {
 	flushing := make(chan bool, 1)

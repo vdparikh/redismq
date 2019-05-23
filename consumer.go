@@ -17,10 +17,14 @@ type Consumer struct {
 	contextCleared <-chan struct{}
 }
 
+const (
+	errUnackedPackages = "unacked Packages found"
+)
+
 // Get returns a single package from the queue (blocking)
 func (consumer *Consumer) Get() (*Package, error) {
 	if consumer.HasUnacked() {
-		return nil, fmt.Errorf("unacked Packages found")
+		return nil, fmt.Errorf(errUnackedPackages)
 	}
 	return consumer.unsafeGet()
 }
@@ -28,7 +32,7 @@ func (consumer *Consumer) Get() (*Package, error) {
 // NoWaitGet returns a single package from the queue (returns nil, nil if no package in queue)
 func (consumer *Consumer) NoWaitGet() (*Package, error) {
 	if consumer.HasUnacked() {
-		return nil, fmt.Errorf("unacked Packages found")
+		return nil, fmt.Errorf(errUnackedPackages)
 	}
 	answer := consumer.Queue.redisClient.RPopLPush(
 		queueInputKey(consumer.Queue.Name),
@@ -48,7 +52,7 @@ func (consumer *Consumer) NoWaitGet() (*Package, error) {
 func (consumer *Consumer) MultiGet(length int) ([]*Package, error) {
 	var collection []*Package
 	if consumer.HasUnacked() {
-		return nil, fmt.Errorf("unacked Packages found")
+		return nil, fmt.Errorf(errUnackedPackages)
 	}
 
 	// TODO maybe use transactions for rollback in case of errors?
