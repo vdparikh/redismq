@@ -73,7 +73,6 @@ func (queue *BufferedQueue) Put(payload string) error {
 // ConsumeMulti return channel to read on
 func (c *Consumer) ConsumeMulti(size int, fn func([]byte)) chan []byte {
 
-	fmt.Println("setting up buffered consumer")
 	chn := make(chan []byte)
 
 	go func(chn chan []byte, size int, fn func([]byte)) {
@@ -94,9 +93,7 @@ func (c *Consumer) ConsumeMulti(size int, fn func([]byte)) chan []byte {
 			packages[len(packages)-1].MultiAck()
 
 			for _, p := range packages {
-				fmt.Println("got multi packages", p.Payload)
 				if fn != nil {
-					fmt.Println("Got Package", p.Payload)
 					go fn([]byte(p.Payload))
 					continue
 				}
