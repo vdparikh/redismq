@@ -70,6 +70,7 @@ func (consumer *Consumer) MultiGet(length int) ([]*Package, error) {
 		}
 		return nil
 	})
+
 	if err != nil && err != redis.Nil {
 		return nil, err
 	}

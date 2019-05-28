@@ -80,8 +80,7 @@ func (c *Consumer) ConsumeMulti(size int, fn func([]byte)) chan []byte {
 		for {
 			packages, err := c.MultiGet(size)
 			if err != nil {
-				fmt.Println(err)
-				if err.Error() == "unacked Packages found" {
+				if err.Error() == errUnackedPackages {
 					for i := 0; i < int(c.GetUnackedLength()); i++ {
 						p, _ := c.GetUnacked()
 						p.Ack()
