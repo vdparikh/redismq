@@ -52,7 +52,7 @@ type ConsumerStat struct {
 }
 
 // NewObserver returns an Oberserver to monitor different statistics from redis
-func NewObserver(redisHost, redisPort, redisPassword string, redisDb int) *Observer {
+func NewObserver(redisHost, redisPort, redisPassword string, redisDb int, enableTLS bool) *Observer {
 	q := &Observer{
 		redisHost:     redisHost,
 		redisPort:     redisPort,
@@ -60,11 +60,19 @@ func NewObserver(redisHost, redisPort, redisPassword string, redisDb int) *Obser
 		redisDb:       redisDb,
 		Stats:         make(map[string]*QueueStat),
 	}
-	q.redisClient = redis.NewClient(&redis.Options{
+
+	connectionOptions := &redis.Options{
 		Addr:     redisHost + ":" + redisPort,
 		Password: redisPassword,
 		DB:       redisDb,
-	})
+	}
+
+	if enableTLS {
+		connectionOptions.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	}
+
+	q.redisClient = redis.NewClient(connectionOptions)
+
 	return q
 }
 
