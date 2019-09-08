@@ -1,6 +1,7 @@
 package redismq
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"log"
