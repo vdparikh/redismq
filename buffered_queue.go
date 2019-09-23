@@ -93,7 +93,12 @@ func (c *Consumer) ConsumeMulti(size int, fn func([]byte)) chan []byte {
 
 			for _, p := range packages {
 				if fn != nil {
-					go fn([]byte(p.Payload))
+// 					go fn([]byte(p.Payload))
+					
+                    go func(fn func([]byte), payload string) {
+                        fn([]byte(payload))
+                    }(fn, p.Payload)
+					
 					continue
 				}
 				chn <- []byte(p.Payload)
